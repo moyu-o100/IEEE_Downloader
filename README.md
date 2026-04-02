@@ -86,8 +86,3 @@ python main.py
 本项目基于原仓库修改：
 
 - [yongcaoplus/IEEE_downloader](https://github.com/yongcaoplus/IEEE_downloader)
-
-原项目参考资料：
-
-- <https://blog.csdn.net/ubooksapp/article/details/49518009>
-- <https://github.com/EdwinZhang1970/Python>
