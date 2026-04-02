@@ -16,6 +16,7 @@ from utils import downLoad_paper, center_window
 
 
 RESAMPLING_LANCZOS = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+LOG_LINE_LIMIT = 1000
 
 
 def show_confirm(message=""):
@@ -67,7 +68,8 @@ def tkimg_resized(img, w_box, h_box, keep_ratio=True):
 def image_label(frame, img, width, height, keep_ratio=True):
     """输入图片信息，及尺寸，返回界面组件"""
     if isinstance(img, str):
-        _img = Image.open(img)
+        with Image.open(img) as opened_img:
+            _img = opened_img.copy()
     else:
         _img = img
     lbl_image = tk.Label(frame, width=width, height=height)
@@ -285,6 +287,10 @@ class App:
     def write_log(self, message):
         self.log_box.configure(state=tk.NORMAL)
         self.log_box.insert(tk.END, str(message) + "\n")
+        line_count = int(self.log_box.index("end-1c").split(".")[0])
+        if line_count > LOG_LINE_LIMIT:
+            excess = line_count - LOG_LINE_LIMIT
+            self.log_box.delete("1.0", "{}.0".format(excess + 1))
         self.log_box.see(tk.END)
         self.log_box.configure(state=tk.DISABLED)
 

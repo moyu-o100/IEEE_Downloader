@@ -40,6 +40,7 @@ def _build_ieee_session():
 def organize_info_by_query(queryText, pageNumber, save_dir, paper_name_with_year=None):
     paper_info = {}
     count = 0
+    session = None
     try:
         session = _build_ieee_session()
         for page in pageNumber:
@@ -70,6 +71,12 @@ def organize_info_by_query(queryText, pageNumber, save_dir, paper_name_with_year
                     count += 1
     except requests.RequestException:
         return False, paper_info
+    finally:
+        if session is not None:
+            try:
+                session.close()
+            except Exception:
+                pass
     if len(paper_info) > 0:
         return True, paper_info
     else:

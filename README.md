@@ -8,6 +8,7 @@
   - 旧版带 `URL: ... arnumber=...` 的导出格式
   - `IEEE Xplore Citation Plain Text` 引文格式
 - 自动兼容从资源管理器复制路径时可能带的隐藏字符
+- Citation 解析结果会本地缓存，重复解析更快
 - UI 增加：
   - 选择保存文件夹按钮
   - 选择 `txt` 文件按钮
@@ -105,6 +106,7 @@ python main.py
 - `save/` 及其他下载输出目录
 - 所有 `pdf`
 - `__pycache__`
+- `.cache/` 本地解析缓存
 - 本地测试样本文件
 
 ## Acknowledgement

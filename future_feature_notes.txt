@@ -1,0 +1,199 @@
+IEEE Downloader future feature notes
+===================================
+
+Goal
+----
+Keep a short backlog of practical next-step features for this project.
+
+
+1. Near-term improvements
+-------------------------
+
+[ ] Add arXiv support
+    - Support parsing arXiv paper URLs and arXiv IDs from txt files
+    - Support keyword search on arXiv
+    - Download PDF from arXiv directly
+    - Optionally download source tarball when available
+    - Support selecting latest version or a specific version
+
+[ ] Add paper metadata extraction
+    - Extract title, authors, year, venue, DOI, abstract, keywords
+    - Store metadata alongside PDF
+    - Save metadata to JSON or CSV
+    - Optionally write a sidecar .txt or .json per paper
+
+[ ] Add richer duplicate detection
+    - Detect duplicates by DOI, arXiv ID, IEEE articleNumber
+    - Not only by local filename
+    - Avoid downloading same paper under different filename templates
+
+[ ] Add export formats
+    - Export BibTeX
+    - Export RIS / EndNote-compatible text
+    - Export CSV for spreadsheet review
+
+[ ] Add configurable filename templates
+    - Examples:
+      - {year} {title}.pdf
+      - {first_author}_{year}_{title}.pdf
+      - {venue}_{year}_{title}.pdf
+    - Auto sanitize invalid path characters
+
+[ ] Add better failure summary
+    - Final failed list in a txt file
+    - Record failure reason per paper
+    - Allow one-click retry for failed items only
+
+
+2. Source expansion ideas
+-------------------------
+
+[ ] Add DOI-based universal resolver
+    - If txt contains DOI only, resolve source automatically
+    - Route download logic by publisher/source
+
+[ ] Add ACL Anthology support
+    - Good for NLP papers
+    - Search by keyword, paper ID, or URL
+
+[ ] Add OpenReview support
+    - Useful for ICLR / NeurIPS workshop style sources
+    - Download PDF plus discussion metadata if needed
+
+[ ] Add CVF Open Access support
+    - CVPR / ICCV / WACV papers
+    - Search by title or venue/year
+
+[ ] Add PubMed / PMC support
+    - Especially useful for biomedical literature
+    - Distinguish metadata-only results vs full-text PDF
+
+[ ] Add Springer / ACM / Elsevier support
+    - Only if the user session has valid access
+    - Publisher-specific session and anti-bot handling likely needed
+
+
+3. Metadata and organization ideas
+----------------------------------
+
+[ ] Metadata sidecar file
+    - Save one .json per PDF
+    - Include:
+      - source
+      - title
+      - authors
+      - venue
+      - year
+      - DOI
+      - abstract
+      - keywords
+      - PDF URL
+      - download time
+
+[ ] Local paper index
+    - Maintain a single papers_index.json or sqlite database
+    - Useful for duplicate detection and later search
+
+[ ] Full-text indexing
+    - Extract text from downloaded PDFs
+    - Local keyword search over downloaded library
+
+[ ] Tag and folder rules
+    - Auto classify by venue / year / topic
+    - Example folders:
+      - save/IEEE/2024/
+      - save/arXiv/robotics/
+
+[ ] Rename existing PDFs from metadata
+    - Rebuild filenames after download
+    - Keep a mapping log from old name to new name
+
+
+4. UI ideas
+-----------
+
+[ ] Add source selector
+    - IEEE
+    - arXiv
+    - DOI
+    - mixed txt import
+
+[ ] Add download queue panel
+    - waiting / downloading / success / failed
+
+[ ] Add cancel / pause / resume
+    - Especially useful for large batches
+
+[ ] Add failed-items retry button
+    - Re-run only failed entries
+
+[ ] Add metadata preview
+    - Show title / year / source before download
+
+[ ] Add save profile presets
+    - Remember output directory
+    - Remember naming rules
+    - Remember selected source
+
+[ ] Add dark/light theme switch
+    - Low priority, but improves usability
+
+
+5. Robustness improvements
+--------------------------
+
+[ ] Better rate limiting per source
+    - Different sites need different request pace
+
+[ ] Per-source session refresh rules
+    - IEEE already benefits from session refresh
+    - Other sites may need independent logic
+
+[ ] Proxy and mirror configuration
+    - Optional proxy settings in UI
+    - Useful for lab / campus network edge cases
+
+[ ] Resume interrupted jobs
+    - Save task state to disk
+    - Continue unfinished batch later
+
+[ ] Integrity checks
+    - Confirm downloaded file is a valid PDF
+    - Confirm file size is above a minimum threshold
+    - Detect HTML error page disguised as PDF download result
+
+
+6. Advanced ideas
+-----------------
+
+[ ] Use Crossref / OpenAlex / Semantic Scholar for metadata enrichment
+    - Fill abstract and citation metadata
+    - Improve title matching for DOI-only inputs
+
+[ ] Citation graph helper
+    - Given one paper, fetch references / cited-by candidates
+    - Build download candidate list
+
+[ ] Reading list assistant
+    - Import a topic keyword and generate a seed paper list
+    - Then batch download available PDFs
+
+[ ] Local LLM-assisted dedup / clustering
+    - Group papers by topic
+    - Summarize downloaded collections
+    - Generate a quick review outline
+
+[ ] Browser-assisted login mode
+    - For sites requiring manual login or institutional redirect
+    - Reuse browser cookies for download session
+
+
+7. Practical next 5 tasks
+-------------------------
+
+1. Add metadata sidecar JSON export
+2. Add duplicate detection by DOI / arXiv ID / articleNumber
+3. Add failed-items retry export and retry button
+4. Add arXiv txt parsing + direct PDF download
+5. Add a local papers_index.json for persistent tracking
+
