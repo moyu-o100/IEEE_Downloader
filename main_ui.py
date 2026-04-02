@@ -332,9 +332,10 @@ class App:
                 info = "{}篇论文已存在，无需下载!".format(len(paper_info))
                 utils.finish_progress(info)
                 utils.log_message(info)
+                self.log_all_downloaded_summary(paper_info)
                 return
             # 下载论文
-            succeed, paper_downloaded, already_exist, failed_papers = downLoad_paper(paper_info)
+            succeed, paper_downloaded, already_exist, failed_papers, already_exist_papers = downLoad_paper(paper_info)
             if succeed:
                 info = "成功下载{}篇论文！".format(paper_downloaded + already_exist)
                 utils.log_message(info)
@@ -401,6 +402,24 @@ class App:
                 return False
         return True
 
+    def log_all_downloaded_summary(self, paper_info):
+        already_exist_papers = [
+            os.path.basename(paper_info[key]['name'])
+            for key in sorted(paper_info.keys())
+        ]
+        utils.log_named_list("已跳过的论文：", already_exist_papers)
+        summary_path = utils.write_download_summary(
+            paper_info,
+            paper_downloaded=0,
+            already_exist=len(already_exist_papers),
+            failed_papers=[],
+            already_exist_papers=already_exist_papers,
+            downloaded_papers=[],
+            elapsed_seconds=0,
+        )
+        if summary_path:
+            utils.log_message("下载汇总已保存: {}".format(summary_path))
+
     def download_2_thread(self):
         save_dir = utils.clean_input_path(self.save_dir.get(0.0, tk.END).split("\n")[0].strip())
         keywords = self.keyword.get(0.0, tk.END).split("\n")[0].strip()
@@ -432,9 +451,10 @@ class App:
                 info = "{}篇论文已存在，无需下载!".format(len(paper_info))
                 utils.finish_progress(info)
                 utils.log_message(info)
+                self.log_all_downloaded_summary(paper_info)
                 return
             # 下载论文
-            succeed, paper_downloaded, already_exist, failed_papers = downLoad_paper(paper_info, show_bar=True)
+            succeed, paper_downloaded, already_exist, failed_papers, already_exist_papers = downLoad_paper(paper_info, show_bar=True)
             if succeed:
                 info = "成功下载{}篇论文!".format(paper_downloaded + already_exist)
                 utils.log_message(info)

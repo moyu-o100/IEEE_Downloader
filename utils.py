@@ -60,6 +60,14 @@ def log_message(message=""):
         _log_callback(text)
 
 
+def log_named_list(title, names):
+    if not names:
+        return
+    log_message(title)
+    for index, name in enumerate(names, start=1):
+        log_message("  {}. {}".format(index, name))
+
+
 def reset_progress(total=0, status=""):
     set_value("progress_bar_num", 0)
     set_value("progress_bar_max", total)
@@ -112,6 +120,63 @@ def clean_input_path(path):
     return path.strip().strip(PATH_CONTROL_CHARS).strip().strip('"').strip("'")
 
 
+def _infer_output_dir(paper_info):
+    for item in paper_info.values():
+        papername = item.get("name")
+        if papername:
+            return os.path.dirname(os.path.abspath(papername))
+    return os.getcwd()
+
+
+def write_download_summary(
+    paper_info,
+    paper_downloaded,
+    already_exist,
+    failed_papers,
+    already_exist_papers,
+    downloaded_papers=None,
+    elapsed_seconds=None,
+):
+    output_dir = _infer_output_dir(paper_info)
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    summary_path = os.path.join(output_dir, "download_summary_{}.txt".format(timestamp))
+    downloaded_papers = downloaded_papers or []
+    elapsed_seconds = float(elapsed_seconds or 0)
+
+    def _section_lines(title, names):
+        lines = ["{} ({})".format(title, len(names))]
+        if names:
+            for index, name in enumerate(names, start=1):
+                lines.append("  {}. {}".format(index, name))
+        else:
+            lines.append("  (none)")
+        lines.append("")
+        return lines
+
+    lines = [
+        "IEEE Downloader Summary",
+        "Generated at: {}".format(time.strftime("%Y-%m-%d %H:%M:%S")),
+        "",
+        "Total papers: {}".format(len(paper_info)),
+        "Downloaded: {}".format(paper_downloaded),
+        "Already existed: {}".format(already_exist),
+        "Failed: {}".format(len(failed_papers)),
+        "Elapsed seconds: {:.2f}".format(elapsed_seconds),
+        "",
+    ]
+    lines.extend(_section_lines("Downloaded papers", downloaded_papers))
+    lines.extend(_section_lines("Skipped existing papers", already_exist_papers))
+    lines.extend(_section_lines("Failed papers", failed_papers))
+
+    try:
+        with open(summary_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+    except OSError as exc:
+        log_message("写入下载汇总失败: {}".format(exc))
+        return None
+    return summary_path
+
+
 
 def get_window_size(win, update=True):
     """ 获得窗体的尺寸 """
@@ -137,6 +202,8 @@ def downLoad_paper(paper_info, show_bar=False):
     succeed = True
     paper_downloaded = 0
     already_exist = 0
+    downloaded_papers = []
+    already_exist_papers = []
     failed_papers = []
     start = time.perf_counter()
     total = len(paper_info)
@@ -154,6 +221,7 @@ def downLoad_paper(paper_info, show_bar=False):
             if os.path.exists(papername):
                 if _is_valid_pdf_file(papername):
                     already_exist += 1
+                    already_exist_papers.append(basename)
                     update_progress(i, total, "已存在: {}".format(basename))
                     t = time.perf_counter() - start
                     log_message("下载进度:{:>3.0f}% ({}/{}) 已存在 {} 用时:{:.2f}s".format(
@@ -181,6 +249,7 @@ def downLoad_paper(paper_info, show_bar=False):
                     with open(papername, 'wb+') as f:
                         f.write(r.content)
                         paper_downloaded += 1
+                        downloaded_papers.append(basename)
                     # 停一下防禁ip
                     time.sleep(1)
                     update_progress(i, total, "已下载: {}".format(basename))
@@ -223,7 +292,20 @@ def downLoad_paper(paper_info, show_bar=False):
     log_message("执行结束".center(len(paper_info)+28,'-'))
     log_message("-"*50)
     log_message("Downloaded {} papers and {} paper already exists.".format(paper_downloaded, already_exist))
+    log_named_list("已跳过的论文：", already_exist_papers)
     if failed_papers:
         log_message("Failed to download {} papers.".format(len(failed_papers)))
+        log_named_list("下载失败的论文：", failed_papers)
+    summary_path = write_download_summary(
+        paper_info,
+        paper_downloaded=paper_downloaded,
+        already_exist=already_exist,
+        failed_papers=failed_papers,
+        already_exist_papers=already_exist_papers,
+        downloaded_papers=downloaded_papers,
+        elapsed_seconds=time.perf_counter() - start,
+    )
+    if summary_path:
+        log_message("下载汇总已保存: {}".format(summary_path))
     log_message("-" * 50)
-    return succeed, paper_downloaded, already_exist, failed_papers
+    return succeed, paper_downloaded, already_exist, failed_papers, already_exist_papers
