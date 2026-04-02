@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+
+save/
+save_*/
+*.pdf
+
+sample_*.txt
+
+.DS_Store
+Thumbs.db
