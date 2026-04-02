@@ -26,6 +26,32 @@
 python -m pip install -r requirements.txt
 ```
 
+可选：如果你希望依赖只安装在当前项目，而不是全局 Python，建议使用虚拟环境：
+
+```bash
+python -m venv .venv
+```
+
+Windows PowerShell 激活：
+
+```bash
+.\.venv\Scripts\Activate.ps1
+```
+
+激活后安装依赖：
+
+```bash
+python -m pip install -U pip
+python -m pip install -r requirements.txt
+```
+
+如果不想手动激活，也可以直接使用项目环境里的 Python：
+
+```bash
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe main_ui.py
+```
+
 ## 运行方式
 
 启动图形界面：
